@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <stack>
 #include <sstream>
-// #include <iostream>
 #include "map.h"
 
 class OctreeNode {
@@ -23,8 +22,7 @@ public:
 class Octree {
 private:
     OctreeNode* root;
-    // int startPoint[3];
-    // int endPoint[3];
+    int thresholdSize = 2;
 
     void buildTree(OctreeNode* node, int x, int y, int z, int size, const std::vector<std::vector<std::vector<int>>>& map);
     void saveTree(OctreeNode* node, std::ofstream& file);

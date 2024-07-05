@@ -45,7 +45,6 @@ int isTupleInVector(const std::vector<std::tuple<int, int, int>>& vec, const std
     }
 }
 
-
 int findMinIndex(float* candidateCost) {
     float minCost = std::numeric_limits<float>::max(); // 가능한 가장 큰 수로 초기화
     int min_index = 0; // 인덱스 초기화
@@ -58,7 +57,6 @@ int findMinIndex(float* candidateCost) {
     }
     return min_index;
 }
-
 
 // int heuristicDistance(int *dst, int *str) {
 //     return abs(dst[0]-str[0])+abs(dst[1]-str[1])+abs(dst[2]-str[2]);
@@ -135,7 +133,7 @@ void Astar::search() {
         // printf("%d\n",std::get<2>(current.back()));
 
         if(areVectorsEqual(current,dst)) {
-            std::cout << "Current and DST are equal.\n";
+            std::cout << "Goal node reached! Total cost: " << cost_so_far[px][py][pz] << std::endl; // goal node 도달 시 cost 출력
             break;
         }
         //현재
@@ -147,14 +145,6 @@ void Astar::search() {
 
         for(int i = 0; i < 6 ; i++) {
             switch(i) {
-                case 0:
-                    if((px>=MapSize-1)) continue;
-                    candidateNode.push_back(std::make_tuple(px+1, py, pz));
-                    break;
-                case 1:
-                    if(px<1) continue;
-                    candidateNode.push_back(std::make_tuple(px-1, py, pz));
-                    break;
                 case 2:
                     if(py>=MapSize-1) continue;
                     candidateNode.push_back(std::make_tuple(px, py+1, pz));
@@ -162,6 +152,14 @@ void Astar::search() {
                 case 3:
                     if(py<1) continue;
                     candidateNode.push_back(std::make_tuple(px, py-1, pz));
+                    break;
+                case 0:
+                    if((px>=MapSize-1)) continue;
+                    candidateNode.push_back(std::make_tuple(px+1, py, pz));
+                    break;
+                case 1:
+                    if(px<1) continue;
+                    candidateNode.push_back(std::make_tuple(px-1, py, pz));
                     break;
                 case 4:
                     if(pz>=MapSize-1) continue;
@@ -200,24 +198,8 @@ void Astar::search() {
                     came_from[cx][cy][cz] = current[0];
                 }
             }
-            
-            
-
         }
-        // std::tie(cx,cy,cz) = candidateNode[minIndex];
-        // frontier.push_back({priority,candidateNode[minIndex]});
-        // came_from[cx][cy][cz] = current[0];
-
-        std::cout<<"Iter: "<<iter<<" Cost: "<<priority<<" Index: "<<minIndex<<"\n\n";
-        printf("%d %d %d\n",cx,cy,cz);
-        // int result = isTupleInVector(cost_so_far, candidateNode[0]);
-        // std::cout << "The tuple is " << (result == 1 ? "in" : "not in") << " the vector." << std::endl;
-
-        // std::cout<<"\n";
-        // std::fill_n(candidateCost, 6, std::numeric_limits<float>::max());
-        
     }
-
 }
 
 void Astar::constructPath() {
@@ -230,19 +212,18 @@ void Astar::constructPath() {
     current.push_back(dst[0]);
     
     for(int iter = 0 ; iter < MapSize*MapSize*MapSize ; iter++) {
-
-        std::cout << "iter: " << iter << "\n";
+        // std::cout << "iter: " << iter << "\n";
         if (areVectorsEqual(current, str)) {//dst 도달 유무 확인
             std::reverse(pathNode.begin(), pathNode.end());
-            std::cout << "Current and STR are equal.\n";
-            std::cout << "iter: " << iter << "\n";
+            // std::cout << "Current and STR are equal.\n";
+            // std::cout << "iter: " << iter << "\n";
             break;
         }
 
         pathNode.push_back(current[0]);
 
         std::tie(px,py,pz) = current[0];
-        printf("%d %d %d\n",px,py,pz);
+        // printf("%d %d %d\n",px,py,pz);
         
         while(!current.empty()) {
             current.pop_back();
@@ -250,14 +231,20 @@ void Astar::constructPath() {
         current.push_back(came_from[px][py][pz]);
 
         trackingLen = iter;
-
-        
     }
     
     for (int iter = 0 ; iter < trackingLen ; iter++) {
         std::tie(x,y,z) = pathNode[iter];
         map[x][y][z] = 2;
         // std::cout<<"Final Path : "<<x<<" "<<y<<" "<<z<<"\n";
+        // std::cout << "Path node: (" << x << ", " << y << ", " << z << ") with cost: " << cost_so_far[x][y][z] <<"\n";
     }
+}
 
+float Astar::calculatePathLength() {
+    float totalLength = 0.0;
+    for (size_t i = 1; i < pathNode.size(); ++i) {
+        totalLength += heuristicDistance(pathNode[i-1], pathNode[i]);
+    }
+    return totalLength;
 }

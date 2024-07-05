@@ -36,6 +36,8 @@ class Astar {
 
     void constructPath();
 
+    float calculatePathLength();
+
     int iter = 0;
     int minIndex = 0;
     int px,py,pz;
